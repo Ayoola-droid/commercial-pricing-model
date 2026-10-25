@@ -1,12 +1,12 @@
 # Commercial Pricing & Scenario Model: An Irish Bakery Loaf
 
-**Business question:** An Irish bakery is pricing a large white sliced pan. What price and volume keep it profitable if ingredient costs keep rising? *(Draft: to be confirmed after the first data review.)*
+**Business question:** A white sliced pan's shop price rose 22.6% in five years, while butter rose 42%, milk 40% and sugar 57%. For a fictional Irish bakery, what loaf price and weekly volume would restore its margin, and how sensitive is profit to further cost rises?
 
 **Data:** CSO table [CPM12, National Average Price](https://data.cso.ie/table/CPM12): monthly average retail prices in Ireland for 76 everyday items, December 2011 to September 2026 (Creative Commons Attribution 4.0). Downloaded 25 October 2026 from the [CSO API](https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/CPM12/CSV/1.0/en).
 
 **Tools:** Python 3.12 (pandas), Excel (Power Query, what-if analysis), PowerPoint
 
-**Status:** In progress. The data is downloaded and inspected; the Excel model is next.
+**Status:** In progress. The CSO data is inspected and loaded into Excel with Power Query; the Inputs tab is next.
 
 ## First look at the data
 
@@ -28,6 +28,37 @@
 | Full fat milk per 2 litre | €2.37 |
 
 These are shop prices paid by consumers, not the wholesale prices a bakery pays, so the model will use them as cost *indices* (how fast costs move) alongside stated assumptions for the bakery's own costs.
+
+## Method
+
+**Series used.** Five of the 76 CSO items: the product and the main ingredients of a white sliced pan.
+
+| CSO item | Column in the model | Why |
+|---|---|---|
+| Bread, white sliced pan, large (800g) | Loaf 800g | The product being priced |
+| White, self raising flour per 2 kg | Flour 2kg | Main ingredient. Bakeries use strong bread flour, which the CSO does not track, so this is a proxy |
+| Butter per lb | Butter lb | Stands in for the fat in the recipe |
+| White granulated sugar per 1 kg | Sugar 1kg | Feeds the yeast |
+| Full fat milk per 2 litre | Milk 2L | Many sliced pans contain milk |
+
+Eggs are left out: a basic sliced pan has none.
+
+**Power Query** (`model/bakery_pricing_model.xlsx`, query `CSO_Prices`) reads `data/raw/CPM12.csv` and:
+
+1. keeps the month code, item and price columns;
+2. drops December 2011 (see data-quality log);
+3. keeps the five items above;
+4. turns the month code (e.g. `202609`) into a date (1 September 2026);
+5. pivots to one row per month and one column per item, with short names that keep the units.
+
+Result: 177 months (January 2012 to September 2026) × 5 prices, no blanks. The first and last rows were checked against the same steps in pandas and match exactly.
+
+## Data quality log
+
+| Action | Issue | Rows |
+|---|---|---|
+| Rejected | December 2011: the first month of the table has no price for any of the five items | 5 |
+| Not used | 71 CSO items outside the bakery basket, including 8 items with 119 months blank | 12,638 |
 
 ## Setup
 
@@ -51,9 +82,12 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 |---|---|
 | `py src\inspect_raw.py` | Prints the shape, date range, items, missing prices and latest bakery prices in the raw CSO file |
 
+The Power Query reads the CSV from `C:\Projects\commercial-pricing-model\data\raw\CPM12.csv`. If you clone the repo somewhere else, open the workbook and change the path in **Data → Get Data → Data Source Settings**, then **Refresh All**.
+
 ## Project structure
 
 - `data/raw/CPM12.csv`: the CSO table as downloaded (never edited)
+- `model/bakery_pricing_model.xlsx`: the Excel model (sheet `CSO_Prices` is loaded by Power Query)
 - `src/inspect_raw.py`: first inspection of the raw file
 - `docs/`: README images
 
