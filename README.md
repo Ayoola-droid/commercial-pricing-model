@@ -6,7 +6,7 @@
 
 **Tools:** Python 3.12 (pandas), Excel (Power Query, what-if analysis), PowerPoint
 
-**Status:** In progress. The CSO data is inspected and loaded into Excel with Power Query; the Inputs tab is next.
+**Status:** In progress. The CSO data is loaded with Power Query and the Inputs tab holds the bakery's assumptions; the calculations are next.
 
 ## First look at the data
 
@@ -53,6 +53,12 @@ Eggs are left out: a basic sliced pan has none.
 
 Result: 177 months (January 2012 to September 2026) × 5 prices, no blanks. The first and last rows were checked against the same steps in pandas and match exactly.
 
+**Inputs tab.** Every assumption about the fictional bakery sits on one sheet: the recipe per loaf, what the bakery pays for each ingredient, other costs per loaf, the retailer's margin, VAT, weekly volume and fixed costs. Blue text marks inputs; black text marks formulas. Each input has a unit and a source note. The ingredient prices and other costs are illustrative assumptions, not real quotes.
+
+Two inputs are formulas: the latest CSO month (`=MAX(CSO_Prices[Month])`) and the shelf price for that month (`XLOOKUP`), so both update when the query is refreshed.
+
+**VAT check.** Bread is zero-rated in Ireland only if its fats and sugars are no more than 12% of the flour's weight; otherwise the reduced rate applies ([Revenue](https://www.revenue.ie/en/tax-professionals/tdm/value-added-tax/part03-taxable-transactions-goods-ica-services/Goods/goods-bread.pdf)). The Inputs tab tests the recipe against that limit: 15 g butter + 10 g sugar = 5.2% of 480 g flour, so the loaf is zero-rated.
+
 ## Data quality log
 
 | Action | Issue | Rows |
@@ -87,7 +93,9 @@ The Power Query reads the CSV from `C:\Projects\commercial-pricing-model\data\ra
 ## Project structure
 
 - `data/raw/CPM12.csv`: the CSO table as downloaded (never edited)
-- `model/bakery_pricing_model.xlsx`: the Excel model (sheet `CSO_Prices` is loaded by Power Query)
+- `model/bakery_pricing_model.xlsx`: the Excel model
+  - `Inputs`: the bakery's assumptions and the VAT check
+  - `CSO_Prices`: the five CSO price series, loaded by Power Query
 - `src/inspect_raw.py`: first inspection of the raw file
 - `docs/`: README images
 
