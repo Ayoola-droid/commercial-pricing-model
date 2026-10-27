@@ -1,12 +1,23 @@
 # Commercial Pricing & Scenario Model: An Irish Bakery Loaf
 
-**Business question:** A white sliced pan's shop price rose 22.6% in five years, while butter rose 42%, milk 40% and sugar 57%. For a fictional Irish bakery, what loaf price and weekly volume would restore its margin, and how sensitive is profit to further cost rises?
+**Business question:** Shop prices for ingredients rose 26–57% in five years, but they add only €0.09 to the cost of a loaf. How much can the bakery's wages, energy and other costs rise before its margin falls below 2021 levels, and what loaf price would protect it?
 
 **Data:** CSO table [CPM12, National Average Price](https://data.cso.ie/table/CPM12): monthly average retail prices in Ireland for 76 everyday items, December 2011 to September 2026 (Creative Commons Attribution 4.0). Downloaded 25 October 2026 from the [CSO API](https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/CPM12/CSV/1.0/en).
 
 **Tools:** Python 3.12 (pandas), Excel (Power Query, what-if analysis), PowerPoint
 
-**Status:** In progress. The CSO data is loaded with Power Query and the Inputs tab holds the bakery's assumptions; the calculations are next.
+**Status:** In progress. The CSO data is loaded with Power Query and the Inputs tab holds the bakery's assumptions; the Calculations tab compares September 2026 with September 2021. Testing real wage and energy rises is next.
+
+## Findings so far
+
+1. **Ingredients rose fast in percentage terms but little in euros.** Between September 2021 and September 2026, CSO shop prices rose 26% for flour, 42% for butter, 40% for milk and 57% for sugar. In the bakery's recipe, that adds **€0.09** to each loaf (ingredients €0.328 → €0.421).
+2. **The loaf's price rose more in euros.** The shelf price rose 22.6% (€1.364 → €1.672), so the bakery's own price rose **€0.23** a loaf after the retailer's 25% margin.
+3. **On ingredients alone, there is no squeeze.** With other costs held flat, weekly operating profit is €3,660 today against €906 in 2021, and the operating margin is 14.6% against 4.4%.
+4. **The squeeze depends on the other costs.** If packaging, energy, labour, distribution and fixed costs rose by more than about **19%** since 2021, today's operating margin is below 2021's (about **15%** for contribution margin).
+
+### Why the business question changed
+
+The first question assumed that fast-rising ingredient prices were squeezing the bakery's margin. The Calculations tab tested that premise and the data disagreed: ingredients are about a third of the bakery's price, so a large percentage rise on a small cost added less than the loaf's own price rise. The question now asks about the costs that can create a squeeze.
 
 ## First look at the data
 
@@ -59,6 +70,8 @@ Two inputs are formulas: the latest CSO month (`=MAX(CSO_Prices[Month])`) and th
 
 **VAT check.** Bread is zero-rated in Ireland only if its fats and sugars are no more than 12% of the flour's weight; otherwise the reduced rate applies ([Revenue](https://www.revenue.ie/en/tax-professionals/tdm/value-added-tax/part03-taxable-transactions-goods-ica-services/Goods/goods-bread.pdf)). The Inputs tab tests the recipe against that limit: 15 g butter + 10 g sugar = 5.2% of 480 g flour, so the loaf is zero-rated.
 
+**Calculations tab.** Compares the latest CSO month with the same month five years earlier (`=EDATE(latest, -60)`). The bakery's ingredient costs in the earlier month are today's costs scaled by the change in CSO shop prices, e.g. 2021 flour cost = today's flour cost × (2021 flour price ÷ today's flour price). Non-ingredient costs in the earlier month are today's divided by (1 + an assumed rise), set on the Inputs tab; 0% means "unchanged". For each month it calculates cost per loaf, the bakery's price after the retailer's margin and VAT, contribution per loaf and margin, weekly profit, operating margin and break-even volume. Changes between two percentages are shown in percentage points.
+
 ## Data quality log
 
 | Action | Issue | Rows |
@@ -95,6 +108,7 @@ The Power Query reads the CSV from `C:\Projects\commercial-pricing-model\data\ra
 - `data/raw/CPM12.csv`: the CSO table as downloaded (never edited)
 - `model/bakery_pricing_model.xlsx`: the Excel model
   - `Inputs`: the bakery's assumptions and the VAT check
+  - `Calculations`: cost, margin and profit per loaf, latest month vs five years earlier
   - `CSO_Prices`: the five CSO price series, loaded by Power Query
 - `src/inspect_raw.py`: first inspection of the raw file
 - `docs/`: README images
