@@ -3,3 +3,6 @@ __pycache__/
 output/
 logs/
 ~$*
+
+# Large public download (54 MB); fetch it with the link in the README
+data/raw/CPM24.csv
