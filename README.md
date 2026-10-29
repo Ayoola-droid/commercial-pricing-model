@@ -11,7 +11,7 @@ CSO data is published under Creative Commons Attribution 4.0.
 
 **Tools:** Python 3.12 (pandas), Excel (Power Query, what-if analysis), PowerPoint
 
-**Status:** In progress. The CSO data is loaded with Power Query and the Inputs tab holds the bakery's assumptions; the Calculations tab compares September 2026 with September 2021 using real wage and price rises, and Goal Seek finds the price that restores the margin. A scenario table and the summary deck are next.
+**Status:** In progress. The CSO data is loaded with Power Query and the Inputs tab holds the bakery's assumptions; the Calculations tab compares September 2026 with September 2021 using real wage and price rises, and Goal Seek finds the price that restores the margin. A Scenarios tab shows profit and margin across price and cost-rise combinations. The summary deck is next.
 
 ## Findings so far
 
@@ -20,6 +20,7 @@ CSO data is published under Creative Commons Attribution 4.0.
 3. **On ingredients alone, there is no squeeze.** With other costs held flat, weekly operating profit is €3,660 today against €906 in 2021, and the operating margin is 14.6% against 4.4%.
 4. **The squeeze is real, and it comes from wages and energy.** Since 2021 the minimum wage rose **38.7%**, the CPI for electricity **49.9%**, fuels **33.5%** and all items **24.0%**. With these rises, the bakery's operating margin is **14.6%** today against **19.1%** in 2021, **4.5 percentage points lower** (weekly profit €3,660 against €3,917).
 5. **A 9-cent rise protects the margin.** Goal Seek finds that a shelf price **5.6% higher (€1.77 instead of €1.67)** restores the 2021 operating margin. Holding the price instead would need about **23,900 loaves a week, 19.5% more volume**. (Goal Seek results for the September 2026 data, run 28 October 2026.)
+6. **Price and cost move profit by similar amounts.** Each 2% on the shelf price adds about **€500** a week; each 2.5% on all bakery costs removes about **€535**. If costs rise another **5%** next year (CPI rose 4.1% in the year to September 2026), even a **10%** price rise gives an 18.5% margin, just short of 2021's 19.1%. The grid assumes volume holds at 20,000 loaves whatever the price, so it is optimistic if shoppers switch brands.
 
 ### Why the business question changed
 
@@ -96,6 +97,8 @@ Caveats: consumer electricity prices differ from business tariffs, and some bake
 
 **Goal Seek.** On the Inputs tab, `B41` is the gap between today's operating margin and the comparison month's. Goal Seek sets it to 0 by changing the price change in `B40` (or the weekly volume in `B28`). Goal Seek writes a fixed number, so it must be re-run when the data changes; the inputs are left at 0% and 20,000 loaves.
 
+**Scenarios tab.** Two grids, one formula each, with mixed references so each cell reads its own price (row 4) and cost rise (column B): weekly operating profit, and operating margin (profit ÷ revenue). The price change is against today's CSO shelf price (not the Goal Seek input), the cost rise applies to all bakery costs, and volume is held at the Inputs value. Conditional formatting colours profit from red (lowest) to green (highest) and highlights margins above the 2021 level. The 0% cost-rise row turns green from a 6% price rise, which agrees with Goal Seek's 5.6%.
+
 ## Data quality log
 
 | Action | Issue | Rows |
@@ -143,6 +146,7 @@ The Power Queries read the CSVs from `C:\Projects\commercial-pricing-model\data\
 - `model/bakery_pricing_model.xlsx`: the Excel model
   - `Inputs`: the bakery's assumptions, cost rises, the pricing decision and the VAT check
   - `Calculations`: cost, margin and profit per loaf, latest month vs five years earlier
+  - `Scenarios`: weekly profit and margin by price change and further cost rise
   - `CSO_Prices`: the five CSO price series, loaded by Power Query
   - `CPI_Index`: three CSO price indices, loaded by Power Query
 - `src/inspect_raw.py`: first inspection of the raw file
